@@ -1,0 +1,41 @@
+import requests
+from bs4 import BeautifulSoup
+
+#web scrapping function
+url = 'https://www.chicagotribune.com/politics/elections/ct-chicago-election-runoff-what-to-know-20230321-ev7gshe5kfasdnhdezurq7snce-story.html'
+def get_page_content(url):
+    response = requests.get(url)
+    soup = BeautifulSoup(response.text, 'html.parser')
+    return soup.get_text()
+
+text = (get_page_content(url))
+
+#definition of genders
+
+import re
+
+def extract_gender_pronouns(text):
+    gender_pronouns = {
+        'he': 0,
+        'she': 0,
+        'they': 0  # add more as needed
+    }
+    for pronoun in gender_pronouns.keys():
+        regex = r"\b" + pronoun + r"\b"
+        gender_pronouns[pronoun] = len(re.findall(regex, text))
+    return gender_pronouns
+
+gender_frequency = extract_gender_pronouns(text)
+
+import matplotlib.pyplot as plt
+
+def plot_gender_pronoun_counts(gender_frequency):
+    labels = list(gender_frequency.keys())
+    values = list(gender_frequency.values())
+    plt.bar(labels, values)
+    plt.xlabel('Gender Pronouns')
+    plt.ylabel('Count')
+    plt.title('Gender Pronoun Counts')
+    plt.show()
+
+print(plot_gender_pronoun_counts(gender_frequency))
