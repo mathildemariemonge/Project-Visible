@@ -10,10 +10,8 @@ def get_page_content(url):
 
 text = (get_page_content(url))
 
-#definition of genders
-
+#definition of genders needs to be bucketted by gender
 import re
-
 def extract_gender_pronouns(text):
     gender_pronouns = {
         'he': 0,
@@ -27,6 +25,7 @@ def extract_gender_pronouns(text):
 
 gender_frequency = extract_gender_pronouns(text)
 
+#plotting the extracted data
 import matplotlib.pyplot as plt
 
 def plot_gender_pronoun_counts(gender_frequency):
@@ -35,7 +34,7 @@ def plot_gender_pronoun_counts(gender_frequency):
     plt.bar(labels, values)
     plt.xlabel('Gender Pronouns')
     plt.ylabel('Count')
-    plt.title('Gender Pronoun Counts')
+    plt.title('Gender Pronoun Frequency')
     plt.show()
 
 print(plot_gender_pronoun_counts(gender_frequency))
