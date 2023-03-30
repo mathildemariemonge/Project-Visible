@@ -1,0 +1,72 @@
+import requests
+from bs4 import BeautifulSoup
+import re
+import matplotlib.pyplot as plt
+
+#make it pretty
+import matplotlib.pyplot as plt
+
+plt.rcParams['font.family'] = 'serif'
+plt.rcParams['font.serif'] = 'Garamond'
+
+# Web scraping function
+def get_page_content(url):
+    response = requests.get(url)
+    soup = BeautifulSoup(response.text, 'html.parser')
+    return soup.get_text()
+
+# Extract gender pronouns from text
+def extract_gender_pronouns(text):
+    gender_pronouns = {
+        'male': {'he': 0, 'him': 0, 'his': 0},
+        'female': {'she': 0, 'her': 0, 'hers': 0},
+        'plural': {'they': 0, 'their': 0, 'them': 0}
+    }
+
+    pronouns = set(pronoun for pronouns in gender_pronouns.values() for pronoun in pronouns)
+    pronoun_counts = {pronoun: len(re.findall(r"\b" + pronoun + r"\b", text)) for pronoun in pronouns}
+
+    result = []
+    for gender in gender_pronouns.keys():
+        gender_counts = gender_pronouns[gender]
+        gender_total = sum([pronoun_counts[pronoun] for pronoun in gender_counts.keys()])
+        for pronoun, count in gender_counts.items():
+            result.append((gender, pronoun, pronoun_counts[pronoun]))
+    return result
+
+# Plot gender pronoun counts
+def plot_gender_pronoun_counts(gender_frequency):
+    # Get the total count of all pronouns
+    total_count = sum(count for gender, pronoun, count in gender_frequency)
+
+    # Group the pronoun counts by gender
+    gender_counts = {'male': 0, 'female': 0, 'plural': 0}
+    for gender, pronoun, count in gender_frequency:
+        gender_counts[gender] += count
+
+    # Convert the gender counts to percentages of the total count
+    gender_percentages = {gender: (count / total_count) * 100 for gender, count in gender_counts.items()}
+    percentage_value = gender_percentages.values()
+
+    # Plot the graph
+    plt.bar(gender_percentages.keys(), gender_percentages.values(), color=['#2D3142', '#F5A962', '#F9D9C6'])
+    plt.xlabel('Gender', fontsize=14)
+    plt.ylabel('% of Total Count', fontsize=14)
+    plt.title('Gender Pronoun Frequency', fontsize=16)
+    plt.xticks(fontsize=9)
+    plt.yticks(fontsize=9)
+
+    # Add percentage values on top of bars
+    for i, v in enumerate(percentage_value):
+        plt.text(i, v + 1, "{:.1f}%".format(v), ha='center', fontsize=10)
+    
+    plt.show()
+
+
+# Get text from web page
+url = 'https://www.chicagotribune.com/politics/elections/ct-chicago-election-runoff-what-to-know-20230321-ev7gshe5kfasdnhdezurq7snce-story.html'
+text = get_page_content(url)
+
+# Extract and plot gender pronoun frequency
+gender_frequency = extract_gender_pronouns(text)
+plot_gender_pronoun_counts(gender_frequency)
